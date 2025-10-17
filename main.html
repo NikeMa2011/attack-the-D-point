@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <link rel="shortcut icon" href="" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="utf-8">
+    <title>undefined</title>
+</head>
+
+<body>
+    <p id="startText" style="animation: appearShift ease-in-out 2s;">进攻D点!</p>
+
+    <div id="mainContent" hidden>
+
+        <p id="status">
+            FPS: 
+            <span id="FPSvalue"></span>
+             ping: 
+            <span id="pingValue"></span>
+             PL: 
+            <span id="packageLostValue"></span>
+        </p>
+
+        <div id="UIcontainer">
+            <div id="vehiclePreview">
+                <div id="previewRing">
+
+                </div>
+            </div>
+
+            <div id="subtitles">
+                <p id="connectionNotWell" class="slashTitle">网络状况不佳</p>
+                <p id="connectionWithServerLost" class="slashTitle">服务器连接丢失</p>
+            </div>
+
+            <div id="chatBox">
+                <div id="messageArea">
+
+                </div>
+
+                <input type="text" placeholder="发送消息..." id="userInput">
+            </div>
+        </div>
+    </div>
+</body>
+
+<style>
+    * {
+        padding: 0;
+        margin: 0;
+    }
+
+    #startText {
+        position: absolute;
+
+        left: 50vw;
+        transform: translate(-50%, 0);
+
+        font-size: 22px;
+        color: #ffffff;
+
+        padding: 10px;
+        border: solid 2px #000000;
+
+        background-color: #ff0000;
+    }
+
+    #UIcontainer {
+        padding: 20px;
+        height: auto;
+        width: auto;
+    }
+
+    #chatBox {
+        background-color: #0000000f;
+        width: 20vw;
+    }
+
+    #messageArea {
+        height: 15vh;
+    }
+
+    #userInput {
+        box-sizing: border-box;
+        border: 0;
+        background-color: #0000000f;
+        font-size: 16px;
+        width: 20vw;
+    }
+
+    #preveiwRing
+
+    #status {
+        font-size: 16px;
+
+        position: absolute;
+
+        left: 0;
+        bottom: 0;
+
+        margin: auto;
+    }
+
+    .slashTitle {
+        font-size: 30px;
+
+        color: #ff0000;
+
+        position: absolute;
+
+        left: 50vw;
+        top: 20vh;
+
+        transform: translate(-50%);
+
+        margin: auto;
+    }
+
+    @keyframes textSlash {
+        0% {
+            opacity: 100;
+        }
+
+        50% {
+            opacity: 0;
+        }
+
+        100% {
+            opacity: 100;
+        }
+    }
+
+    @keyframes appearShift {
+        0% {
+            transform: translate(-50%, -100%);
+            opacity: 0;
+        }
+
+        100% {
+            transform: translate(-50%, 0%);
+            opacity: 100;
+        }
+    }
+
+    @keyframes appear {
+        0% {
+            opacity: 0;
+        }
+
+        100% {
+            opacity: 100;
+        }
+    }
+
+    @keyframes disappearShift {
+        0% {
+            transform: translate(-50%, 0%);
+            opacity: 100;
+        }
+
+        100% {
+            transform: translate(-50%, -100%);
+            opacity: 0;
+        }
+    }
+</style>
+<script>
+    const startText = document.getElementById("startText");
+    const mainContent = document.getElementById("mainContent");
+
+    startText.onclick = () => {
+        startText.style.animation = "disappearShift ease-in-out 2s";
+        startText.style.opacity = 0;
+
+        mainContent.hidden = false;
+        mainContent.style.animation = "appear ease-in-out 2s";
+    }
+
+    const answers = {}
+    const playerNames = ["碳酸氢钠 一氧化二氢溶液", "能打胜仗 作风优良", "会飞的豹豹", "Subtile2038", "MickyMice0654", "请西方朋友做出回答", "梦想成为中系战狠", "QUEENnnn00", "noobGamerZ7644", "miligmz", "nihaoyawyt"];
+
+    function addRandomPlayerName() {
+
+    }
+
+    function randomEvent() {
+
+    }
+</script>
+
+</html>
