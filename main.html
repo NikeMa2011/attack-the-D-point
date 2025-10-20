@@ -2,10 +2,10 @@
 <html lang="zh">
 
 <head>
-    <link rel="shortcut icon" href="" type="image/x-icon">
+    <link rel="shortcut icon" href="bvvd大头照.png" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta charset="utf-8">
-    <title>undefined</title>
+    <title>💥血压升高器</title>
 </head>
 
 <body>
@@ -13,25 +13,38 @@
 
     <div id="mainContent" hidden>
 
-        <p id="status">
-            FPS: 
-            <span id="FPSvalue"></span>
-             ping: 
-            <span id="pingValue"></span>
-             PL: 
-            <span id="packageLostValue"></span>
+        <p id="gameStatus">
+            <span>FPS: </span>
+            <span id="FPSvalue">0</span>
+            <span> ping: </span>
+            <span id="pingValue">0</span>
+            <span> PL: </span>
+            <span id="packageLostValue">0</span><span id="packageLostValuePercentSigh">% </span>
+            <span id="matchID">1145141919810</span>
         </p>
+
+        <p id="ultraLowQuality">Ultra low quality</p>
 
         <div id="UIcontainer">
             <div id="vehiclePreview">
-                <div id="previewRing">
+                <div id="vehiclePreviewRing"></div>
 
+                <div id="vehicleStatus">
+                    <p>速度 0km/h</p>
+                    <p>挡位 N</p>
+                    <p>转速 600</p>
                 </div>
             </div>
 
             <div id="subtitles">
-                <p id="connectionNotWell" class="slashTitle">网络状况不佳</p>
-                <p id="connectionWithServerLost" class="slashTitle">服务器连接丢失</p>
+                <div class="slashTitle">
+                    <p id="connectionNotWell" hidden>网络状况不佳</p>
+                    <p id="connectionWithServerLost" hidden>服务器连接丢失</p>
+                </div>
+
+                <p id="waitMateSorry">等待队友道歉</p>
+
+                <p id="crewLockText" hidden>成员组解锁尚需 <span id="crewLockTime"></span></p>
             </div>
 
             <div id="chatBox">
@@ -41,6 +54,14 @@
 
                 <input type="text" placeholder="发送消息..." id="userInput">
             </div>
+
+            <div id="hitReview" style="opacity: 0;">
+                <div id="hitReviewCanvas"></div>
+
+                <div id="hitReviewText"></div>
+            </div>
+
+            <div id="map"></div>
         </div>
     </div>
 </body>
@@ -57,42 +78,73 @@
         left: 50vw;
         transform: translate(-50%, 0);
 
-        font-size: 22px;
-        color: #ffffff;
+        font-size: 30px;
+        color: rgb(255, 255, 255);
 
         padding: 10px;
-        border: solid 2px #000000;
+        border: solid 2px rgb(64, 64, 64);
 
-        background-color: #ff0000;
+        background-color: rgb(255, 0, 0);
     }
 
-    #UIcontainer {
-        padding: 20px;
-        height: auto;
-        width: auto;
+    #mainContent {
+        background-image: url(warThunder.jpg);
+        background-size: cover;
+
+        width: 100vw;
+        height: 100vh;
+    }
+
+    #chatBox, #hitReview {
+        background-color: rgba(128, 128, 128, 0.2);
+        width: 20vw;
     }
 
     #chatBox {
-        background-color: #0000000f;
-        width: 20vw;
+        position: absolute;
+
+        left: 0;
+        bottom: calc(40vh + 20px);
     }
 
-    #messageArea {
-        height: 15vh;
+    #messageArea, #hitReviewCanvas {
+        height: 20vh;
+    }
+
+    #hitReviewText {
+        text-align: center;
+
+        font-size: 24px;
+    }
+
+    #hitReview {
+        position: absolute;
+
+        top: 0;
+        right: 0;
+
+        margin: auto;
     }
 
     #userInput {
+        font-size: 16px;
+
+        padding: 2px;
+    }
+
+    #userInput, #hitReviewText {
         box-sizing: border-box;
         border: 0;
-        background-color: #0000000f;
-        font-size: 16px;
+
+        background-color: rgba(128, 128, 128, 0.2);
+
         width: 20vw;
     }
 
-    #preveiwRing
+    #gameStatus {
+        color: rgb(255, 255, 255);
 
-    #status {
-        font-size: 16px;
+        font-size: 14px;
 
         position: absolute;
 
@@ -102,10 +154,35 @@
         margin: auto;
     }
 
-    .slashTitle {
+    #crewLockText {
+        color: rgb(255, 0, 0);
         font-size: 30px;
 
-        color: #ff0000;
+        position: absolute;
+
+        bottom: 15vh;
+        left: 50vw;
+
+        transform: translate(-50%, -50%);
+    }
+
+    #ultraLowQuality {
+        color: rgb(255, 255, 255);
+
+        font-size: 14px;
+
+        position: absolute;
+
+        right: 0;
+        bottom: 0;
+
+        margin: auto;
+    }
+
+    .slashTitle {
+        font-size: 40px;
+
+        color: rgb(255, 0, 0);
 
         position: absolute;
 
@@ -115,19 +192,88 @@
         transform: translate(-50%);
 
         margin: auto;
+
+        text-align: center;
+    }
+
+    #waitMateSorry {
+        color: rgb(255, 255, 255);
+
+        font-size: 30px;
+
+        position: absolute;
+
+        bottom: 20vh;
+        left: 50vw;
+
+        transform: translate(-50%, -50%);
+    }
+
+    #vehiclePreview {
+        height: 35vh;
+        width: 35vh;
+
+        position: absolute;
+
+        bottom: 20px;
+        left: 0;
+
+        background-color: rgba(0, 119, 255, 0.1);
+
+        border: 2px solid rgba(0, 119, 255, 0.3);
+        border-radius: 50% 50% 50% 0%;
+    }
+
+    #vehiclePreviewRing {
+        height: 20vh;
+        width: 20vh;
+
+        position: absolute;
+
+        bottom: 7.5vh;
+        left: 7.5vh;
+
+        background-color: rgba(0, 119, 255, 0.1);
+
+        border-radius: 50%;
+    }
+
+    #vehicleStatus {
+        position: absolute;
+
+        bottom: 15px;
+        left: 15px;
+
+        color: white;
+
+        font-size: 20px;
+    }
+
+    #map {
+        height: 25vh;
+        width: 25vh;
+
+        background-color: rgb(128, 128, 128);
+
+        position: absolute;
+
+        bottom: 20px;
+        right: 0;
+
+        border: 2px solid rgb(0, 0, 0);
     }
 
     @keyframes textSlash {
         0% {
-            opacity: 100;
+            opacity: 1;
         }
 
         50% {
-            opacity: 0;
+            opacity: 0.5;
         }
 
         100% {
-            opacity: 100;
+            opacity: 1;
         }
     }
 
@@ -139,7 +285,7 @@
 
         100% {
             transform: translate(-50%, 0%);
-            opacity: 100;
+            opacity: 1;
         }
     }
 
@@ -149,14 +295,14 @@
         }
 
         100% {
-            opacity: 100;
+            opacity: 1;
         }
     }
 
     @keyframes disappearShift {
         0% {
             transform: translate(-50%, 0%);
-            opacity: 100;
+            opacity: 1;
         }
 
         100% {
@@ -164,20 +310,77 @@
             opacity: 0;
         }
     }
+
+    @keyframes disappearWithDelay {
+        0% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 1;
+        }
+
+        100% {
+            opacity: 0;
+        }
+    }
 </style>
 <script>
-    const startText = document.getElementById("startText");
-    const mainContent = document.getElementById("mainContent");
+    const startTextDOM = document.getElementById("startText");
+    const mainContentDOM = document.getElementById("mainContent");
 
-    startText.onclick = () => {
-        startText.style.animation = "disappearShift ease-in-out 2s";
-        startText.style.opacity = 0;
+    const connectionNotWellDOM = document.getElementById("connectionNotWell");
+    const connectionWithServerLostDOM = document.getElementById("connectionWithServerLost");
 
-        mainContent.hidden = false;
-        mainContent.style.animation = "appear ease-in-out 2s";
+    const crewLockTimeDOM = document.getElementById("crewLockTime");
+    const crewLockTextDOM = document.getElementById("crewLockText");
+
+    const FPSvalueDOM = document.getElementById("FPSvalue");
+    const pingValueDOM = document.getElementById("pingValue");
+    const packageLostValueDOM = document.getElementById("packageLostValue");
+    const packageLostValuePercentSighDOM = document.getElementById("packageLostValuePercentSigh");
+    const matchIDDOM = document.getElementById("matchID");
+
+    const hitReviewDOM = document.getElementById("hitReview");
+    const hitReviewTextDOM = document.getElementById("hitReviewText");
+
+    let crewLockTime = {
+        "minute": 8,
+        "second": 0
     }
 
-    const answers = {}
+    let musicPlayNow = new Audio()
+    let musicNumber = 0;
+
+    let hitReviewTextList = ["命中", "未击穿", "跳弹", "弹头碎裂", "目标处于出生保护状态", "未对目标造成伤害"];
+    let hitReviewTextColorList = ["rgb(255, 255, 255)", "rgb(42, 180, 42)", "rgb(170, 170, 170)", "rgb(0, 0, 0)", "rgb(42, 180, 42)", "rgb(170, 170, 170)"];
+
+    let hitTimeOut;
+
+    setTimeout(() => {
+        startTextDOM.onclick = () => {
+            startTextDOM.style.animation = "disappearShift ease-in-out 2s";
+            startTextDOM.style.opacity = 0;
+
+            mainContentDOM.hidden = false;
+            mainContentDOM.style.animation = "appear ease-in-out 2s";
+
+            setTimeout("start()", 2000);
+        }
+    }, 2000);
+
+    let redColor = "#ff0022";
+    let yellowColor = "#ffff22";
+    let whiteColor = "#ffffff";
+
+    const musicSrcList = ["advance australia.mp3", "arise great country.mp3"];
+
+    const answers = {
+        "attack the D point": "进攻D点"
+    };
+
+    const IDrandomcharactors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+
     const playerNames = ["碳酸氢钠 一氧化二氢溶液", "能打胜仗 作风优良", "会飞的豹豹", "Subtile2038", "MickyMice0654", "请西方朋友做出回答", "梦想成为中系战狠", "QUEENnnn00", "noobGamerZ7644", "miligmz", "nihaoyawyt"];
 
     function addRandomPlayerName() {
@@ -186,6 +389,156 @@
 
     function randomEvent() {
 
+    }
+
+    function connectionChange() {
+        let randomNum = Math.random();
+        let randomAnimationDuration = Math.floor(2000 + (randomNum * 10000));
+
+        connectionNotWellDOM.hidden = true;
+        connectionWithServerLostDOM.hidden = true;
+
+        connectionNotWellDOM.style = "";
+        connectionWithServerLostDOM.style = "";
+
+        if (randomNum > 0.6) {
+            connectionNotWellDOM.hidden = false;
+            connectionNotWellDOM.style.animation = "textSlash linear 1s infinite";
+        } else if (randomNum > 0.4) {
+            connectionWithServerLostDOM.hidden = false;
+            connectionWithServerLostDOM.style.animation = "textSlash linear 1s infinite";
+        }
+
+        setTimeout("connectionChange()", randomAnimationDuration);
+    }
+
+    function crewLocks() {
+        crewLockTime.minute = 8;
+        crewLockTime.second = 0;
+
+        crewLockTextDOM.hidden = false;
+
+        crewLocksCount();
+    }
+
+    function crewUnlocks() {
+        let randomNum = Math.random();
+        let randomDuration = Math.floor(randomNum * 10000);
+
+        crewLockTextDOM.hidden = true;
+        crewLockTextDOM.innerHTML = "";
+
+        setTimeout("crewLocks()", randomDuration);
+    }
+
+    function crewLocksCount() {
+        crewLockTimeDOM.innerHTML = '0' + crewLockTime.minute + "分 " + (crewLockTime.second > 9 ? "" : '0') + crewLockTime.second + '秒';
+
+        crewLockTime.second--;
+
+        if (crewLockTime.second < 0) {
+            if (crewLockTime.minute < 0) {
+                setTimeout("crewUnlocks()", 1000);
+            } else {
+                crewLockTime.minute--;
+
+                crewLockTime.second = 59;
+
+                setTimeout("crewLocksCount()", 1000);
+            }
+        } else {
+            setTimeout("crewLocksCount()", 1000);
+        }
+    }
+
+    function setgameStatus() {
+        FPSvalueDOM.innerHTML = Math.floor(120 + (Math.random() * 40));
+
+        if (connectionWithServerLostDOM.hidden == false) {
+            if (Math.random() > 0.8) {
+                pingValueDOM.innerHTML = Math.floor(700 + (Math.random() * 299));
+                packageLostValueDOM.innerHTML = Math.floor(70 + (Math.random() * 29));
+            }
+        } else if (connectionNotWellDOM.hidden == false) {
+            if (Math.random() > 0.3) {
+                pingValueDOM.innerHTML = Math.floor(400 + (Math.random() * 299));
+                packageLostValueDOM.innerHTML = Math.floor(40 + (Math.random() * 29));
+            }
+        } else {
+            pingValueDOM.innerHTML = Math.floor(100 + (Math.random() * 299));
+            packageLostValueDOM.innerHTML = Math.floor(10 + (Math.random() * 29));
+        }
+
+        // pinglost
+        if (pingValueDOM.innerHTML >= 500) {
+            pingValueDOM.style.color = redColor;
+        } else if (pingValueDOM.innerHTML >= 200) {
+            pingValueDOM.style.color = yellowColor;
+        } else {
+            pingValueDOM.style.color = whiteColor;
+        }
+
+        // packageLost
+        if (packageLostValueDOM.innerHTML >= 50) {
+            packageLostValueDOM.style.color = redColor;
+            packageLostValuePercentSighDOM.style.color = redColor;
+        } else if (packageLostValueDOM.innerHTML >= 20) {
+            packageLostValueDOM.style.color = yellowColor;
+            packageLostValuePercentSighDOM.style.color = yellowColor;
+        } else {
+            packageLostValueDOM.style.color = whiteColor;
+            packageLostValuePercentSighDOM.style.color = whiteColor;
+        }
+
+        setTimeout("setgameStatus()", 1000);
+    }
+
+    function setRandomID() {
+        matchIDDOM.innerHTML = "";
+
+        for (let i = 0; i < 16; i++) {
+            matchIDDOM.innerHTML += IDrandomcharactors[Math.floor(Math.random() * 34)];
+        }
+    }
+
+    function musicSetAndPlay() {
+        musicNumber++;
+
+        if (musicNumber >= musicSrcList.length) {
+            musicNumber = 0;
+        }
+
+        musicPlayNow.src = musicSrcList[musicNumber];
+
+        musicPlayNow.play();
+    }
+
+    musicPlayNow.addEventListener("ended", musicSetAndPlay);
+
+    function hitReview() {
+        hitReviewDOM.style.opacity = 1;
+        
+        let randomListNumber = Math.floor(Math.random() * hitReviewTextList.length);
+        
+        hitReviewTextDOM.innerHTML = hitReviewTextList[randomListNumber];
+        hitReviewTextDOM.style.color = hitReviewTextColorList[randomListNumber];
+        
+        hitReviewDOM.style.animation = "";
+        hitReviewDOM.offsetHeight;
+        hitReviewDOM.style.animation = "disappearWithDelay linear 5s forwards";
+    }
+
+    addEventListener("mousedown", hitReview);
+
+    function start() {
+        setRandomID();
+
+        musicSetAndPlay();
+
+        connectionChange();
+        crewLocks();
+
+        setgameStatus();
     }
 </script>
 
