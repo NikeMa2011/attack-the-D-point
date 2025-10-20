@@ -25,6 +25,9 @@
 
         <p id="ultraLowQuality">Ultra low quality</p>
 
+        <div id="cursorCircle"></div>
+        <div id="crosshairCircle"></div>
+
         <div id="UIcontainer">
             <div id="vehiclePreview">
                 <div id="vehiclePreviewRing"></div>
@@ -261,6 +264,21 @@
         right: 0;
 
         border: 2px solid rgb(0, 0, 0);
+    }
+
+    #crosshairCircle, #cursorCircle {
+        border: 1px solid #ffffff;
+        border-radius: 50%;
+    } 
+
+    #crosshairCircle {
+        height: 30px;
+        width: 30px;
+    }
+
+    #cursorCircle {
+        height: 50px;
+        width: 50px;
     }
 
     @keyframes textSlash {
