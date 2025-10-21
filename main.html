@@ -13,20 +13,24 @@
 
     <div id="mainContent" hidden>
 
-        <p id="gameStatus">
-            <span>FPS: </span>
-            <span id="FPSvalue">0</span>
-            <span> ping: </span>
-            <span id="pingValue">0</span>
-            <span> PL: </span>
-            <span id="packageLostValue">0</span><span id="packageLostValuePercentSigh">% </span>
-            <span id="matchID">1145141919810</span>
-        </p>
+        <div id="gameStatusBar">
+            <p id="gameStatus">
+                <span>FPS: </span>
+                <span id="FPSvalue">0</span>
+                <span> ping: </span>
+                <span id="pingValue">0</span>
+                <span> PL: </span>
+                <span id="packageLostValue">0</span><span id="packageLostValuePercentSigh">% </span>
+                <span id="matchID">null</span>
+            </p>
 
-        <p id="ultraLowQuality">Ultra low quality</p>
+            <p id="ultraLowQuality">Ultra low quality</p>
+        </div>
 
-        <div id="cursorCircle"></div>
-        <div id="crosshairCircle"></div>
+        <div id="mouseCircles" hidden>
+            <div id="cursorCircle"></div>
+            <div id="crosshairCircle"></div>
+        </div>
 
         <div id="UIcontainer">
             <div id="vehiclePreview">
@@ -37,6 +41,11 @@
                     <p>挡位 N</p>
                     <p>转速 600</p>
                 </div>
+            </div>
+
+            <div id="repairVehicle">
+                <p id="repairVehicleText"><span class="keyIcon">F</span> 按住 3 秒以维修</p>
+                <p id="firefightVehicleText"><span class="keyIcon">6</span> 按住 3 秒以灭火</p>
             </div>
 
             <div id="subtitles">
@@ -75,6 +84,10 @@
         margin: 0;
     }
 
+    body {
+        overflow: hidden;
+    }
+
     #startText {
         position: absolute;
 
@@ -98,7 +111,8 @@
         height: 100vh;
     }
 
-    #chatBox, #hitReview {
+    #chatBox,
+    #hitReview {
         background-color: rgba(128, 128, 128, 0.2);
         width: 20vw;
     }
@@ -110,7 +124,8 @@
         bottom: calc(40vh + 20px);
     }
 
-    #messageArea, #hitReviewCanvas {
+    #messageArea,
+    #hitReviewCanvas {
         height: 20vh;
     }
 
@@ -133,9 +148,12 @@
         font-size: 16px;
 
         padding: 2px;
+
+        color: rgb(255, 255, 255);
     }
 
-    #userInput, #hitReviewText {
+    #userInput,
+    #hitReviewText {
         box-sizing: border-box;
         border: 0;
 
@@ -145,14 +163,11 @@
     }
 
     #gameStatus {
-        color: rgb(255, 255, 255);
+        color: rgba(255, 255, 255, 0.5);
 
         font-size: 14px;
 
-        position: absolute;
-
-        left: 0;
-        bottom: 0;
+        float: left;
 
         margin: auto;
     }
@@ -172,14 +187,11 @@
     #ultraLowQuality {
         color: rgb(255, 255, 255);
 
-        font-size: 14px;
+        font-size: 10px;
 
-        position: absolute;
+        float: right;
 
-        right: 0;
-        bottom: 0;
-
-        margin: auto;
+        text-shadow: 0 0 1px rgb(0, 0, 0);
     }
 
     .slashTitle {
@@ -266,19 +278,54 @@
         border: 2px solid rgb(0, 0, 0);
     }
 
-    #crosshairCircle, #cursorCircle {
-        border: 1px solid #ffffff;
+    #crosshairCircle,
+    #cursorCircle {
+        position: absolute;
+
+        border: 1px solid rgba(255, 255, 255, 0.5);
         border-radius: 50%;
-    } 
+    }
 
     #crosshairCircle {
-        height: 30px;
-        width: 30px;
+        height: 25px;
+        width: 25px;
     }
 
     #cursorCircle {
         height: 50px;
         width: 50px;
+    }
+
+    #gameStatusBar {
+        height: auto;
+        width: 100vw;
+
+        background-color: rgba(0, 0, 0, 0.2);
+
+        position: absolute;
+
+        bottom: 0;
+        left: 0;
+    }
+
+    #repairVehicleText, #firefightVehicleText {
+        position: absolute;
+
+        bottom: 25vh;
+
+
+    }
+
+    .messageText {
+        font-size: 16px;
+    }
+
+    .messageFromMate {
+        color: rgb(90, 167, 255);
+    }
+
+    .messageSend {
+        color: rgb(255, 255, 255);
     }
 
     @keyframes textSlash {
@@ -328,20 +375,6 @@
             opacity: 0;
         }
     }
-
-    @keyframes disappearWithDelay {
-        0% {
-            opacity: 1;
-        }
-
-        50% {
-            opacity: 1;
-        }
-
-        100% {
-            opacity: 0;
-        }
-    }
 </style>
 <script>
     const startTextDOM = document.getElementById("startText");
@@ -362,6 +395,18 @@
     const hitReviewDOM = document.getElementById("hitReview");
     const hitReviewTextDOM = document.getElementById("hitReviewText");
 
+    const cursorCircle = document.getElementById("cursorCircle");
+    const crosshairCircle = document.getElementById("crosshairCircle");
+    const mouseCircles = document.getElementById("mouseCircles");
+
+    const userInput = document.getElementById("userInput");
+    const messageArea = document.getElementById("messageArea");
+
+    let cursorX, cursorY;
+    let windowHeight, windowWidth;
+
+    let crosshairSpeed = 5;
+
     let crewLockTime = {
         "minute": 8,
         "second": 0
@@ -370,10 +415,12 @@
     let musicPlayNow = new Audio()
     let musicNumber = 0;
 
-    let hitReviewTextList = ["命中", "未击穿", "跳弹", "弹头碎裂", "目标处于出生保护状态", "未对目标造成伤害"];
-    let hitReviewTextColorList = ["rgb(255, 255, 255)", "rgb(42, 180, 42)", "rgb(170, 170, 170)", "rgb(0, 0, 0)", "rgb(42, 180, 42)", "rgb(170, 170, 170)"];
+    let playerName = "player";
 
-    let hitTimeOut;
+    let hitReviewTextList = ["命中", "命中", "未击穿", "跳弹", "弹头碎裂", "目标处于出生保护状态", "未对目标造成伤害", "重创", "致命攻击", "成员昏迷", "燃油爆炸", "弹药殉爆", "外部主结构断裂"];
+    let hitReviewTextColorList = ["rgb(255, 255, 255)", "rgb(255, 181, 70)", "rgb(62, 255, 62)", "rgb(170, 170, 170)", "rgb(0, 0, 0)", "rgb(62, 255, 62)", "rgb(170, 170, 170)", "rgb(255, 80, 40)", "rgb(255, 80, 40)", "rgb(255, 40, 40)", "rgb(255, 40, 40)", "rgb(255, 40, 40)", "rgb(255, 40, 40)"];
+
+    let hitReviewTimeout;
 
     setTimeout(() => {
         startTextDOM.onclick = () => {
@@ -387,9 +434,9 @@
         }
     }, 2000);
 
-    let redColor = "#ff0022";
-    let yellowColor = "#ffff22";
-    let whiteColor = "#ffffff";
+    let redColor = "rgba(255, 0, 34, 0.5)";
+    let yellowColor = "rgba(255, 255, 34, 0.5)";
+    let whiteColor = "rgba(255, 255, 255, 0.5)";
 
     const musicSrcList = ["advance australia.mp3", "arise great country.mp3"];
 
@@ -399,7 +446,7 @@
 
     const IDrandomcharactors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
-    const playerNames = ["碳酸氢钠 一氧化二氢溶液", "能打胜仗 作风优良", "会飞的豹豹", "Subtile2038", "MickyMice0654", "请西方朋友做出回答", "梦想成为中系战狠", "QUEENnnn00", "noobGamerZ7644", "miligmz", "nihaoyawyt"];
+    const randomPlayerNames = ["碳酸氢钠 一氧化二氢溶液", "能打胜仗 作风优良", "会飞的豹豹", "Subtile2038", "MickyMice0654", "请西方朋友做出回答", "梦想成为中系战狠", "QUEENnnn00", "noobGamerZ7644", "miligmz", "nihaoyawyt"];
 
     function addRandomPlayerName() {
 
@@ -444,7 +491,6 @@
         let randomDuration = Math.floor(randomNum * 10000);
 
         crewLockTextDOM.hidden = true;
-        crewLockTextDOM.innerHTML = "";
 
         setTimeout("crewLocks()", randomDuration);
     }
@@ -455,11 +501,11 @@
         crewLockTime.second--;
 
         if (crewLockTime.second < 0) {
+            crewLockTime.minute--;
+
             if (crewLockTime.minute < 0) {
                 setTimeout("crewUnlocks()", 1000);
             } else {
-                crewLockTime.minute--;
-
                 crewLockTime.second = 59;
 
                 setTimeout("crewLocksCount()", 1000);
@@ -487,7 +533,6 @@
             packageLostValueDOM.innerHTML = Math.floor(10 + (Math.random() * 29));
         }
 
-        // pinglost
         if (pingValueDOM.innerHTML >= 500) {
             pingValueDOM.style.color = redColor;
         } else if (pingValueDOM.innerHTML >= 200) {
@@ -496,7 +541,6 @@
             pingValueDOM.style.color = whiteColor;
         }
 
-        // packageLost
         if (packageLostValueDOM.innerHTML >= 50) {
             packageLostValueDOM.style.color = redColor;
             packageLostValuePercentSighDOM.style.color = redColor;
@@ -515,38 +559,101 @@
         matchIDDOM.innerHTML = "";
 
         for (let i = 0; i < 16; i++) {
-            matchIDDOM.innerHTML += IDrandomcharactors[Math.floor(Math.random() * 34)];
+            matchIDDOM.innerHTML += IDrandomcharactors[Math.floor(Math.random() * IDrandomcharactors.length)];
         }
     }
 
     function musicSetAndPlay() {
-        musicNumber++;
-
         if (musicNumber >= musicSrcList.length) {
             musicNumber = 0;
         }
 
         musicPlayNow.src = musicSrcList[musicNumber];
-
         musicPlayNow.play();
     }
 
-    musicPlayNow.addEventListener("ended", musicSetAndPlay);
+    musicPlayNow.addEventListener("ended", () => {
+        musicNumber++;
+
+        musicSetAndPlay();
+    });
 
     function hitReview() {
+        clearTimeout(hitReviewTimeout);
+
         hitReviewDOM.style.opacity = 1;
-        
+
         let randomListNumber = Math.floor(Math.random() * hitReviewTextList.length);
-        
+
         hitReviewTextDOM.innerHTML = hitReviewTextList[randomListNumber];
         hitReviewTextDOM.style.color = hitReviewTextColorList[randomListNumber];
-        
-        hitReviewDOM.style.animation = "";
-        hitReviewDOM.offsetHeight;
-        hitReviewDOM.style.animation = "disappearWithDelay linear 5s forwards";
+
+        hitReviewTimeout = setTimeout(() => {
+            hitReviewDOM.style.opacity = 0;
+        }, 4000);
     }
 
     addEventListener("mousedown", hitReview);
+
+    function setCursorXY(event) {
+        cursorX = event.clientX;
+        cursorY = event.clientY;
+    }
+
+    function setCursorCircle() {
+        cursorCircle.style.left = cursorX - (cursorCircle.offsetWidth / 2) + "px";
+        cursorCircle.style.top = cursorY - (cursorCircle.offsetHeight / 2) + "px";
+    }
+
+    function setCrosshairCircle() {
+        let crosshairXdiffence = (parseInt(cursorCircle.style.left) + (cursorCircle.offsetWidth / 2)) - (parseInt(crosshairCircle.style.left) + (crosshairCircle.offsetWidth / 2));
+        let crosshairYdiffence = (parseInt(cursorCircle.style.top) + (cursorCircle.offsetHeight / 2)) - (parseInt(crosshairCircle.style.top) + (crosshairCircle.offsetHeight / 2));
+
+        if (Math.abs(crosshairXdiffence) > crosshairSpeed) {
+            crosshairCircle.style.left = parseInt(crosshairCircle.style.left) + (Math.sign(crosshairXdiffence) * crosshairSpeed) + "px";
+        } else {
+            crosshairCircle.style.left = cursorX - (crosshairCircle.offsetWidth / 2) + "px";
+        }
+
+        if (Math.abs(crosshairYdiffence) > crosshairSpeed) {
+            crosshairCircle.style.top = parseInt(crosshairCircle.style.top) + (Math.sign(crosshairYdiffence) * crosshairSpeed) + "px";
+        } else {
+            crosshairCircle.style.top = cursorY - (crosshairCircle.offsetHeight / 2) + "px";
+        }
+    }
+
+    function setCrosshairCircleOnMouse() {
+        crosshairCircle.style.left = cursorX - (crosshairCircle.offsetWidth / 2) + "px";
+        crosshairCircle.style.top = cursorY - (crosshairCircle.offsetHeight / 2) + "px";
+    }
+
+    window.onmousemove = (event) => {
+        setCursorXY(event);
+
+        setCursorCircle();
+    };
+
+    function setWindowWidthHeight() {
+        windowHeight = window.innerHeight;
+        WindowWidth = window.innerWidth;
+    }
+
+    window.onresize = setWindowWidthHeight();
+
+    function sendMessage() {
+        if (userInput.value == "") {
+            return;
+        }
+        messageArea.innerHTML += "<p class=\"messageText\"><span class=\"messageFromMate\">[友军]</span><span class=\"messageFromMate\">" + playerName + ": </span><span class=\"messageSend\">" + userInput.value + "</span></p>";
+
+        userInput.value = "";
+    }
+
+    window.onkeydown = (event) => {
+        if (event.code == "Enter") {
+            sendMessage();
+        }
+    }
 
     function start() {
         setRandomID();
@@ -557,7 +664,16 @@
         crewLocks();
 
         setgameStatus();
+
+        mouseCircles.hidden = false;
+        setCrosshairCircleOnMouse();
+
+        setInterval(() => {
+            setCrosshairCircle();
+        }, 16);
     }
+
+    setWindowWidthHeight();
 </script>
 
 </html>
