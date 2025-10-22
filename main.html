@@ -9,7 +9,7 @@
 </head>
 
 <body>
-    <p id="startText" style="animation: appearShift ease-in-out 2s;">进攻D点!</p>
+    <p id="startText" style="animation: appearShift linear 2s;">进攻D点!</p>
 
     <div id="mainContent" hidden>
 
@@ -29,7 +29,7 @@
 
         <div id="mouseCircles" hidden>
             <div id="cursorCircle"></div>
-            <div id="crosshairCircle"></div>
+            <div id="crosshairCircle" hidden></div>
         </div>
 
         <div id="UIcontainer">
@@ -44,8 +44,14 @@
             </div>
 
             <div id="repairVehicle">
-                <p id="repairVehicleText"><span class="keyIcon">F</span> 按住 3 秒以维修</p>
-                <p id="firefightVehicleText"><span class="keyIcon">6</span> 按住 3 秒以灭火</p>
+                <p id="repairVehicleText" class="repairTextBox" style="opacity: 0;">
+                    <span class="keyIcon">F</span>
+                    <span class="repairText"> 按住 3 秒以维修</span>
+                </p>
+                <p id="firefightVehicleText" class="repairTextBox" style="opacity: 0;">
+                    <span class="keyIcon">6</span>
+                    <span class="repairText"> 按住 3 秒以灭火</span>
+                </p>
             </div>
 
             <div id="subtitles">
@@ -191,7 +197,7 @@
 
         float: right;
 
-        text-shadow: 0 0 1px rgb(0, 0, 0);
+        text-shadow: 1px 1px 1px rgb(0, 0, 0);
     }
 
     .slashTitle {
@@ -218,7 +224,7 @@
 
         position: absolute;
 
-        bottom: 20vh;
+        bottom: 18vh;
         left: 50vw;
 
         transform: translate(-50%, -50%);
@@ -308,12 +314,15 @@
         left: 0;
     }
 
-    #repairVehicleText, #firefightVehicleText {
+    .repairTextBox {
         position: absolute;
 
-        bottom: 25vh;
+        bottom: 26vh;
+        left: 50vw;
 
+        font-size: 30px;
 
+        transform: translate(-50%, -50%);
     }
 
     .messageText {
@@ -325,7 +334,44 @@
     }
 
     .messageSend {
+        color: rgb(212, 212, 212);
+    }
+
+    .keyIcon {
+        color: rgb(212, 212, 212);
+
+        border: 2px solid rgb(212, 212, 212);
+        border-radius: 5px;
+
+        background-color: rgb(64, 64, 64);
+
+        padding: 10px 20px;
+
+        text-align: center;
+    }
+
+    .repairText {
         color: rgb(255, 255, 255);
+    }
+
+    @keyframes repairVehicleTextShift {
+        0% {
+            bottom: 26vh;
+        }
+
+        100% {
+            bottom: 29vh;
+        }
+    }
+
+    @keyframes firefightVehicleTextShift {
+        0% {
+            bottom: 26vh;
+        }
+
+        100% {
+            bottom: 23vh;
+        }
     }
 
     @keyframes textSlash {
@@ -361,6 +407,16 @@
 
         100% {
             opacity: 1;
+        }
+    }
+
+    @keyframes disappear {
+        0% {
+            opacity: 1;
+        }
+
+        100% {
+            opacity: 0;
         }
     }
 
@@ -402,7 +458,17 @@
     const userInput = document.getElementById("userInput");
     const messageArea = document.getElementById("messageArea");
 
+    const repairVehicleTextDOM = document.getElementById("repairVehicleText");
+    const firefightVehicleTextDOM = document.getElementById("firefightVehicleText");
+
+    let repairVehicleStatus = {
+        "repair" : false,
+        "firefight" : false
+    };
+
     let cursorX, cursorY;
+    let cursorNotReady = true;
+
     let windowHeight, windowWidth;
 
     let crosshairSpeed = 5;
@@ -417,24 +483,29 @@
 
     let playerName = "player";
 
-    let hitReviewTextList = ["命中", "命中", "未击穿", "跳弹", "弹头碎裂", "目标处于出生保护状态", "未对目标造成伤害", "重创", "致命攻击", "成员昏迷", "燃油爆炸", "弹药殉爆", "外部主结构断裂"];
-    let hitReviewTextColorList = ["rgb(255, 255, 255)", "rgb(255, 181, 70)", "rgb(62, 255, 62)", "rgb(170, 170, 170)", "rgb(0, 0, 0)", "rgb(62, 255, 62)", "rgb(170, 170, 170)", "rgb(255, 80, 40)", "rgb(255, 80, 40)", "rgb(255, 40, 40)", "rgb(255, 40, 40)", "rgb(255, 40, 40)", "rgb(255, 40, 40)"];
+    let hitReviewTextList = ["未击穿", "未击穿", "命中", "命中", "跳弹", "跳弹", "未对目标造成伤害", "未对目标造成伤害", "命中", "命中", "弹头碎裂", "弹头碎裂", "目标处于出生保护状态", "重创", "致命攻击", "成员昏迷", "弹药殉爆", "燃油爆炸", "外部主结构断裂"];
+    let hitReviewTextColorList = ["rgb(62, 255, 62)", "rgb(62, 255, 62)", "rgb(255, 255, 255)", "rgb(255, 255, 255)", "rgb(170, 170, 170)", "rgb(170, 170, 170)", "rgb(170, 170, 170)", "rgb(170, 170, 170)", "rgb(255, 181, 70)", "rgb(255, 181, 70)", "rgb(0, 0, 0)", "rgb(0, 0, 0)", "rgb(62, 255, 62)", "rgb(255, 80, 40)", "rgb(255, 80, 40)", "rgb(255, 40, 40)", "rgb(255, 40, 40)", "rgb(255, 40, 40)", "rgb(255, 40, 40)"];
 
     let hitReviewTimeout;
 
     setTimeout(() => {
         startTextDOM.onclick = () => {
-            startTextDOM.style.animation = "disappearShift ease-in-out 2s";
+            startTextDOM.style.animation = "disappearShift linear 2s";
             startTextDOM.style.opacity = 0;
 
             mainContentDOM.hidden = false;
-            mainContentDOM.style.animation = "appear ease-in-out 2s";
+            mainContentDOM.style.animation = "appear linear 2s";
 
-            setTimeout("start()", 2000);
+            setTimeout(() => {
+                startTextDOM.style.animation = "";
+                mainContentDOM.style.animation = "";
+
+                start();
+            }, 2000);
         }
     }, 2000);
 
-    let redColor = "rgba(255, 0, 34, 0.5)";
+    let redColor = "rgba(255, 34, 34, 0.5)";
     let yellowColor = "rgba(255, 255, 34, 0.5)";
     let whiteColor = "rgba(255, 255, 255, 0.5)";
 
@@ -487,8 +558,8 @@
     }
 
     function crewUnlocks() {
-        let randomNum = Math.random();
-        let randomDuration = Math.floor(randomNum * 10000);
+        let randomNumber = Math.random();
+        let randomDuration = Math.floor(randomNumber * 10000);
 
         crewLockTextDOM.hidden = true;
 
@@ -583,10 +654,18 @@
 
         hitReviewDOM.style.opacity = 1;
 
-        let randomListNumber = Math.floor(Math.random() * hitReviewTextList.length);
+        let randomPosibility = Math.random();
 
-        hitReviewTextDOM.innerHTML = hitReviewTextList[randomListNumber];
-        hitReviewTextDOM.style.color = hitReviewTextColorList[randomListNumber];
+        for (let i = 0; i < hitReviewTextList.length; i++) {
+            let listRatio = i / hitReviewTextList.length;
+
+            if (randomPosibility < listRatio) {
+                hitReviewTextDOM.innerHTML = hitReviewTextList[i];
+                hitReviewTextDOM.style.color = hitReviewTextColorList[i];
+
+                break;
+            }
+        }
 
         hitReviewTimeout = setTimeout(() => {
             hitReviewDOM.style.opacity = 0;
@@ -620,18 +699,16 @@
         } else {
             crosshairCircle.style.top = cursorY - (crosshairCircle.offsetHeight / 2) + "px";
         }
+
+        setTimeout("setCrosshairCircle()", 16);
     }
 
-    function setCrosshairCircleOnMouse() {
+    function setCrosshairCircleOnCursor() {
+        crosshairCircle.hidden = false;
+
         crosshairCircle.style.left = cursorX - (crosshairCircle.offsetWidth / 2) + "px";
         crosshairCircle.style.top = cursorY - (crosshairCircle.offsetHeight / 2) + "px";
     }
-
-    window.onmousemove = (event) => {
-        setCursorXY(event);
-
-        setCursorCircle();
-    };
 
     function setWindowWidthHeight() {
         windowHeight = window.innerHeight;
@@ -655,6 +732,65 @@
         }
     }
 
+    function repairVehicle() {
+        let randomNumber = Math.random();
+        let randomTime = Math.floor(Math.random() * 30000);
+
+        if (randomNumber > 0.5) {
+            if (repairVehicleStatus.repair) {
+                setTimeout("repairVehicle()", randomTime);
+
+                return;
+            } else {
+                repairVehicleStatus.repair = true;
+            }
+
+            repairVehicleTextDOM.style.opacity = 1;
+
+            if (repairVehicleStatus.firefight) {
+                repairVehicleTextDOM.style.animation = "appear 0.2s linear, repairVehicleTextShift 0.2s linear";
+                repairVehicleTextDOM.style.bottom = "29vh";
+
+                if (firefightVehicleTextDOM.style.animation == '') {
+                    firefightVehicleTextDOM.style.animation = "firefightVehicleTextShift 0.2s linear";
+                } else {
+                    firefightVehicleTextDOM.style.animation = "appear 0.2s linear, firefightVehicleTextShift 0.2s linear";
+                }
+
+                firefightVehicleTextDOM.style.bottom = "23vh";
+            } else {
+                repairVehicleTextDOM.style.animation = "appear 0.2s linear";
+            }
+        } else {
+            if (repairVehicleStatus.firefight) {
+                setTimeout("repairVehicle()", randomTime);
+
+                return;
+            } else {
+                repairVehicleStatus.firefight = true;
+            }
+
+            firefightVehicleTextDOM.style.opacity = 1;
+
+            if (repairVehicleStatus.repair) {
+                firefightVehicleTextDOM.style.animation = "appear 0.2s linear, firefightVehicleTextShift 0.2s linear";
+                firefightVehicleTextDOM.style.bottom = "23vh";
+
+                if (repairVehicleTextDOM.style.animation == '') {
+                    repairVehicleTextDOM.style.animation = "repairVehicleTextShift 0.2s linear";
+                } else {
+                    repairVehicleTextDOM.style.animation = "appear 0.2s linear, repairVehicleTextShift 0.2s linear";
+                }
+
+                repairVehicleTextDOM.style.bottom = "29vh";
+            } else {
+                firefightVehicleTextDOM.style.animation = "appear 0.2s linear";
+            }
+        }
+
+        setTimeout("repairVehicle()", randomTime);
+    }
+
     function start() {
         setRandomID();
 
@@ -666,11 +802,21 @@
         setgameStatus();
 
         mouseCircles.hidden = false;
-        setCrosshairCircleOnMouse();
 
-        setInterval(() => {
-            setCrosshairCircle();
-        }, 16);
+        window.onmousemove = (event) => {
+            setCursorXY(event);
+
+            setCursorCircle();
+
+            if (cursorNotReady) {
+                setCrosshairCircle();
+                setCrosshairCircleOnCursor();
+
+                cursorNotReady = false;
+            }
+        };
+
+        repairVehicle();
     }
 
     setWindowWidthHeight();
