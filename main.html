@@ -79,7 +79,86 @@
                 <div id="hitReviewText"></div>
             </div>
 
-            <div id="map"></div>
+            <div id="mapContainer">
+                <table id="map">
+                    <thead>
+                        <tr>
+                            <th scope="col">
+                                <p class="mapTextOnHorizontal">a</p>
+
+                                <p class="mapTextOnParallel">1</p>
+                            </th>
+                            <th scope="col">
+                                <p class="mapTextOnParallel">2</p>
+                            </th>
+                            <th scope="col">
+                                <p class="mapTextOnParallel">3</p>
+                            </th>
+                            <th scope="col">
+                                <p class="mapTextOnParallel">4</p>
+                            </th>
+                            <th scope="col">
+                                <p class="mapTextOnParallel">5</p>
+                            </th>
+                            <th scope="col">
+                                <p class="mapTextOnParallel">6</p>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr scope="row">
+                            <th>
+                                <p class="mapTextOnHorizontal">b</p>
+                            </th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                        <tr scope="row">
+                            <th>
+                                <p class="mapTextOnHorizontal">c</p>
+                            </th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                        <tr scope="row">
+                            <th>
+                                <p class="mapTextOnHorizontal">d</p>
+                            </th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                        <tr scope="row">
+                            <th>
+                                <p class="mapTextOnHorizontal">e</p>
+                            </th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                        <tr scope="row">
+                            <th>
+                                <p class="mapTextOnHorizontal">f</p>
+                            </th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </body>
@@ -271,8 +350,8 @@
     }
 
     #map {
-        height: 25vh;
-        width: 25vh;
+        height: 24vh;
+        width: 24vh;
 
         background-color: rgb(128, 128, 128);
 
@@ -281,6 +360,7 @@
         bottom: 20px;
         right: 0;
 
+        border-collapse: collapse;
         border: 2px solid rgb(0, 0, 0);
     }
 
@@ -352,6 +432,32 @@
 
     .repairText {
         color: rgb(255, 255, 255);
+    }
+
+    #map td,
+    #map th {
+        border: 1px solid rgb(0, 0, 0);
+    }
+
+    #map th {
+        height: 4vh;
+        width: 4vh;
+
+        position: relative;
+    }
+
+    .mapTextOnHorizontal {
+        position: absolute;
+
+        bottom: 0;
+        right: 0;
+    }
+
+    .mapTextOnParallel {
+        position: absolute;
+
+        top: 0;
+        right: 0;
     }
 
     @keyframes repairVehicleTextShift {
@@ -462,8 +568,8 @@
     const firefightVehicleTextDOM = document.getElementById("firefightVehicleText");
 
     let repairVehicleStatus = {
-        "repair" : false,
-        "firefight" : false
+        "repair": false,
+        "firefight": false
     };
 
     let cursorX, cursorY;
@@ -483,8 +589,8 @@
 
     let playerName = "player";
 
-    let hitReviewTextList = ["未击穿", "未击穿", "命中", "命中", "跳弹", "跳弹", "未对目标造成伤害", "未对目标造成伤害", "命中", "命中", "弹头碎裂", "弹头碎裂", "目标处于出生保护状态", "重创", "致命攻击", "成员昏迷", "弹药殉爆", "燃油爆炸", "外部主结构断裂"];
-    let hitReviewTextColorList = ["rgb(62, 255, 62)", "rgb(62, 255, 62)", "rgb(255, 255, 255)", "rgb(255, 255, 255)", "rgb(170, 170, 170)", "rgb(170, 170, 170)", "rgb(170, 170, 170)", "rgb(170, 170, 170)", "rgb(255, 181, 70)", "rgb(255, 181, 70)", "rgb(0, 0, 0)", "rgb(0, 0, 0)", "rgb(62, 255, 62)", "rgb(255, 80, 40)", "rgb(255, 80, 40)", "rgb(255, 40, 40)", "rgb(255, 40, 40)", "rgb(255, 40, 40)", "rgb(255, 40, 40)"];
+    let hitReviewTextList = ["未击穿", "未击穿", "命中", "命中", "跳弹", "跳弹", "未对目标造成伤害", "未对目标造成伤害", "命中", "命中", "弹头碎裂", "弹头碎裂", "目标处于出生保护状态", "重创", "致命攻击"];
+    let hitReviewTextColorList = ["rgb(62, 255, 62)", "rgb(62, 255, 62)", "rgb(255, 255, 255)", "rgb(255, 255, 255)", "rgb(170, 170, 170)", "rgb(170, 170, 170)", "rgb(170, 170, 170)", "rgb(170, 170, 170)", "rgb(255, 181, 70)", "rgb(255, 181, 70)", "rgb(0, 0, 0)", "rgb(0, 0, 0)", "rgb(62, 255, 62)", "rgb(255, 80, 40)", "rgb(255, 80, 40)"];
 
     let hitReviewTimeout;
 
@@ -734,7 +840,7 @@
 
     function repairVehicle() {
         let randomNumber = Math.random();
-        let randomTime = Math.floor(Math.random() * 30000);
+        let randomTime = Math.floor(Math.random() * 60000);
 
         if (randomNumber > 0.5) {
             if (repairVehicleStatus.repair) {
